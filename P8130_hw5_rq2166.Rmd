@@ -34,7 +34,11 @@ data(state.x77)
 state.x77 = 
   state.x77 %>% 
   as.data.frame() %>% 
+<<<<<<< HEAD
   janitor::clean_names()
+=======
+  jean
+>>>>>>> 5f0482fcbf6dd5a67c24fbdba86042d0dd5c55b3
 
  sum_data  <-  arsenal::tableby( ~ ., 
                                 data  = state.x77,
