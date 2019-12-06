@@ -1,7 +1,7 @@
 ---
 title: "p8130_hw5_rq2166"
 author: "Ruoyuan Qian"
-output: github_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -33,7 +33,8 @@ data(state.x77)
 ```{r}
 state.x77 = 
   state.x77 %>% 
-  as.data.frame() 
+  as.data.frame() %>% 
+  janitor::clean_names()
 
  sum_data  <-  arsenal::tableby( ~ ., 
                                 data  = state.x77,
@@ -52,49 +53,49 @@ summ
 ```{r}
 gg_p = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$population, y = state.x77$life_exp))+
+    ggplot(aes(x = population, y = life_exp))+
     geom_point()+
      labs(x = "population")
   
   
 gg_in = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$income, y = state.x77$life_exp))+
+    ggplot(aes(x = income, y = life_exp))+
     geom_point()+
      labs(x = "income")
   
   
 gg_il = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$illiteracy, y = state.x77$life_exp))+
+    ggplot(aes(x = illiteracy, y = life_exp))+
     geom_point()+
      labs(x = "illiteracy")
   
   
 gg_m = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$murder, y = state.x77$life_exp))+
+    ggplot(aes(x = murder, y = life_exp))+
     geom_point()+
      labs(x = "murder")
   
   
 gg_h = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$hs_grad, y = state.x77$life_exp))+
+    ggplot(aes(x = hs_grad, y = life_exp))+
     geom_point()+
      labs(x = "hs_grad")
   
   
 gg_f = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$frost, y = state.x77$life_exp))+
+    ggplot(aes(x = frost, y = life_exp))+
     geom_point()+
      labs(x = "frost")
   
 
 gg_a = 
     state.x77 %>% 
-    ggplot(aes(x = state.x77$area, y = state.x77$life_exp))+
+    ggplot(aes(x = area, y = life_exp))+
     geom_point()+
      labs(x = "area")
 
@@ -391,7 +392,21 @@ Yes, they generate the same model
 
 ```{r}
 cor(state_log)
+influence.measures(for.fit)
+par(mfrow=c(1,2))
+plot(for.fit,which=4)
+plot(for.fit,which=5)
 ```
+
+```{r}
+state_log_new = 
+state_log %>% 
+  filter(!(frost == 0))
+
+for.fit <- lm(life_exp ~ murder + hs_grad + log_population + frost,state_log_new)
+summary(for.fit)
+```
+
 
 The correlation between two is -0.657, so there is some association between them but not very strong.
 
