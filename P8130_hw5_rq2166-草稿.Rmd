@@ -1,7 +1,7 @@
 ---
 title: "p8130_hw5_rq2166"
 author: "Ruoyuan Qian"
-output: github_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -46,6 +46,122 @@ summ
 ```
 
 ## b)
+
+```{r}
+gg_p = 
+    state.x77 %>% 
+    ggplot(aes(x = population, y = life_exp))+
+    geom_point()+
+     labs(x = "population")
+  
+  
+gg_in = 
+    state.x77 %>% 
+    ggplot(aes(x = income, y = life_exp))+
+    geom_point()+
+     labs(x = "income")
+  
+  
+gg_il = 
+    state.x77 %>% 
+    ggplot(aes(x = illiteracy, y = life_exp))+
+    geom_point()+
+     labs(x = "illiteracy")
+  
+  
+gg_m = 
+    state.x77 %>% 
+    ggplot(aes(x = murder, y = life_exp))+
+    geom_point()+
+     labs(x = "murder")
+  
+  
+gg_h = 
+    state.x77 %>% 
+    ggplot(aes(x = hs_grad, y = life_exp))+
+    geom_point()+
+     labs(x = "hs_grad")
+  
+  
+gg_f = 
+    state.x77 %>% 
+    ggplot(aes(x = frost, y = life_exp))+
+    geom_point()+
+     labs(x = "frost")
+  
+
+gg_a = 
+    state.x77 %>% 
+    ggplot(aes(x = area, y = life_exp))+
+    geom_point()+
+     labs(x = "area")
+
+
+multiplot(gg_p,gg_in,gg_il,
+          gg_m,gg_h,gg_f,gg_a,
+          cols=2)  
+```
+
+```{r}
+ggb_p = 
+    state.x77 %>% 
+    ggplot(aes(y = population))+
+    geom_boxplot()+
+     labs(y = "population")
+  
+  
+ggb_in = 
+    state.x77 %>% 
+    ggplot(aes(y = income))+
+    geom_boxplot()+
+     labs(y = "income")
+  
+  
+ggb_il = 
+    state.x77 %>% 
+    ggplot(aes(y = illiteracy))+
+    geom_boxplot()+
+     labs(y = "illiteracy")
+  
+  
+ggb_m = 
+    state.x77 %>% 
+    ggplot(aes(y = murder))+
+    geom_boxplot()+
+     labs(y = "murder")
+  
+  
+ggb_h = 
+    state.x77 %>% 
+    ggplot(aes(y = hs_grad))+
+    geom_boxplot()+
+     labs(y = "hs_grad")
+  
+  
+ggb_f = 
+    state.x77 %>% 
+    ggplot(aes(y = frost))+
+    geom_boxplot()+
+     labs(y = "frost")
+  
+
+ggb_a = 
+    state.x77 %>% 
+    ggplot(aes(y = area))+
+    geom_boxplot()+
+     labs(y = "area")
+
+ggb_li = 
+    state.x77 %>% 
+    ggplot(aes(y = life_exp))+
+    geom_boxplot()+
+     labs(y = "life_exp")
+
+
+multiplot(ggb_p,ggb_in,ggb_il,
+          ggb_m,ggb_h,ggb_f,ggb_a,ggb_li,
+          cols=2)  
+```
 
 ```{r}
 
@@ -110,6 +226,8 @@ multiplot(ggh_p,ggh_in,ggh_il,
           cols=2) 
 ```
 
+Population and area are skewed
+
 transformation
 ```{r}
 ggl_p = 
@@ -142,9 +260,12 @@ state.x77 %>%
   select(-area,-population)
 ```
 
+
 ## c)
 
 ### i
+
+Correlation between murder and illiteracy is > 0.7.
 
 backwards
 ```{r}
@@ -257,6 +378,7 @@ mult.fit <- lm(life_exp ~ ., data=state_log)
 step(mult.fit, direction='backward')
 ```
 
+Yes, they generate the same model
 
 ### ii
 
@@ -276,12 +398,25 @@ anova(for.fit1,for.fit)
 
 ```{r}
 cor(state_log)
+influence.measures(for.fit)
+par(mfrow=c(1,2))
+plot(for.fit,which=4)
+plot(for.fit,which=5)
 ```
+
+```{r}
+state_log_new = 
+state_log %>% 
+  filter(!(frost == 0))
+
+for.fit <- lm(life_exp ~ murder + hs_grad + log_population + frost,state_log_new)
+summary(for.fit)
+```
+
 
 The correlation between two is -0.657, so there is some association between them but not very strong.
 
 ## d)
-
 ```{r}
 # Printing the 2 best models of each size, using the Cp criterion:
 leaps(x = state_log[,-3], y = state_log[,3], nbest=2, method="Cp")
@@ -314,6 +449,11 @@ plot(2:8, rs$adjr2, xlab="No of parameters", ylab="Adj R2")
 
 ```
 
+When the number of parameter is equal to 5, the largest Radj and smallest cp.
+
+When the number of parameter is equal to 4, similar cp = number of parameters.
+
+When the number of parameter is equal to 3, the most similar cp = number of parameters.
 
 ```{r}
 # AIC of the 3-predictor model:
@@ -331,24 +471,50 @@ summary(aic.fit5)
 AIC(aic.fit5)
 ```
 
+When 4 predictors, the AIC is the smallest. So choose model with 4 predictors.
+
+murder + hs_grad + log_population + frost
+
 
 ## e)
 
 ### i
+
+c) and d) get te same model.
+
+```{r}
+influence.measures(aic.fit4) 
+```
 
 ```{r}
 aic.fit4 <- lm(life_exp ~ murder + hs_grad + log_population + frost ,state_log[-11,] )
 summary(aic.fit4)
 ```
 
+There are four influencial points: Alaska, California, Hawaii, Nevada
+
+We need more information about these four stats and we cannot delete them without any researches.
 
 ### ii
 ```{r}
+par(mfrow = c(1, 2))
+qqnorm(resid(aic.fit4), xlab = "Expected Value", ylab = "Residual", main = "")
+qqline(resid(aic.fit4))
+title("QQ Plot for Y (Life expendency)")
+
+
+plot(fitted(aic.fit4), resid(aic.fit4), xlab = "Predicted/Fitted value", ylab = "Residual")
+title("Residual Plot for lnY Life expendency)")
+abline(0, 0)
 
 par(mfrow=c(2,2))
 plot(aic.fit4)
 
 ```
+
+1. According to the QQ plot, the points are linear, so the residuals follow normal distribution.
+
+2. According to the residual vs fitted values, the points are bounce arround y=0, which means they contain constant variance and they are independent to each other.
 
 ### iii
 
@@ -379,8 +545,17 @@ model_caret$resample
 # Look at standard deviation around the Rsquared value by examining the R-squared from each fold.
 sd(model_caret$resample$Rsquared)
 
+
+
+# Full data had an Rsquared=0.8299; what was the CV result for R-squared?
+# What about MSE values? Values are comparable.
 ```
 
+The R squared(0.7674965) is higher than the whole model(0.7404).
+
+## f)
+
+R-squared, AIC, Cp
 
 # Porblem 2
 
@@ -397,6 +572,9 @@ mult.fit <- lm(Rental_rate ~ ., data=CP)
 summary(mult.fit)
 ```
 
+Except for the `Vacancy_rate`, all other variables are significant.
+
+The R squared is 0.5629, which means 58.47% of the variance in y (Rental_rate) is explained by 4 variables(Age, Taxes, Vacancy_rate, Sq_footage).
 
 ## b)
 
@@ -428,6 +606,9 @@ multiplot(gg_a,gg_t,gg_s,
           cols=2)  
 ```
 
+In the plots of `Sq_footage` and `Taxes`, there is a strong relation between `Sq_footage`, `Taxes` and the outcome(`Rental_rate`), respectively.
+
+However, as for the Age plot, the points are diveided into two cluster apparently, and the linear association is not as strong as others.
 
 ## c)
 
@@ -447,11 +628,20 @@ mult.fit <- lm(Rental_rate ~ Age_center + Taxes + Sq_footage + I(Age_center^2), 
 summary(mult.fit)
 
 
+mutate(CP_center, fitted = fitted(mult.fit)) %>%
+  ggplot(., aes(y=Rental_rate, x=Age)) + geom_point() + 
+  geom_line(aes(y = fitted), color = "red") + theme_bw()
+
+
 mult.fit1 <- lm(Rental_rate ~ Age + Taxes + Sq_footage + I(Age^2), data=CP)
 summary(mult.fit1)
 
 
 ```
+
+The points from Age vs Rental_rate is not quadratic, so the higher order may not suitable, though the second order Age is significant.
+
+We should centered Age, since it can avoid the correlation between first and second order of Age variable.
 
 ### ii
 
@@ -463,6 +653,10 @@ CP$Ageest <- ifelse(CP$Age<8, 0, CP$Age-8)
 reg_spline<-lm(Rental_rate ~ Age + Taxes + Sq_footage + Ageest, data=CP)
 summary(reg_spline)
 
+mutate(CP, fitted = fitted(reg_spline)) %>%
+  ggplot(., aes(y=Rental_rate, x=Age)) + geom_point() + 
+  geom_line(aes(y = fitted), color = "red") + theme_bw()
+
 reg_spline1<-lm(Rental_rate ~ Age + Ageest, data=CP)
 summary(reg_spline1)
 
@@ -470,17 +664,91 @@ mutate(CP, fitted = fitted(reg_spline1)) %>%
   ggplot(., aes(y=Rental_rate, x=Age)) + geom_point() + 
   geom_line(aes(y = fitted), color = "red") + theme_bw()
 
+
 reg_spline1<-lm(Rental_rate ~ Age + Ageest  + Taxes + Sq_footage, data=CP)
 summary(reg_spline1)
 
+
+vif(reg_spline1)
 ```
 
+According to the scatter plot, I split the points with Age = 8, since there are clearly two clusters in the plot.
+
+### iii
+
+The adj_R squared and SE are similar between two models, I recommend to use picewise, since it is easier to interpret 
 
 ## e)
+```{r}
+
+par(mfrow=c(2,2))
+plot(reg_spline)
+
+par(mfrow=c(2,2))
+plot(mult.fit)
+
+
+AIC(mult.fit)
+AIC(reg_spline)
+
+
+
+```
 
 ```{r}
+
+par(mfrow=c(2,2))
+plot(reg_spline)
+
+par(mfrow=c(2,2))
+plot(mult.fit)
+
+
+AIC(mult.fit)
+AIC(reg_spline)
+
 mult.fit1 <- lm(Rental_rate ~ Age + Taxes + Sq_footage, data=CP)
 mult.fit2 <- lm(Rental_rate ~ Age_center + Taxes + Sq_footage + I(Age_center^2), data=CP_center)
+summary(mult.fit1)
+summary(mult.fit2)
+
+AIC(mult.fit1)
+AIC(mult.fit2)
+
+```
+
+```{r}
+## Printing the 2 best models of each size, using the Cp criterion:
+#leaps(x = CP_center[,-1], y = CP_center[,1], nbest=2, ethod="Cp")
+#
+#
+## Printing the 2 best models of each size, using the adjusted R^2 #criterion:
+#leaps(x = CP_center[,-1], y = CP_center[,1], nbest=2, #method="adjr2")
+
+## Summary of models for each size (one model per size)
+## Function regsubsets() performs a subset slection by identifying #the "best" model that contains
+## a certain number of predictors. By default "best" is chosen #using SSE/RSS (smaller is better).
+#
+#
+#b<-regsubsets(Rental_rate  ~ Age + Taxes + Sq_footage + #I(Age_center^2), data=CP_center)
+#   (rs<-summary(b))
+#
+## This function also returns R2, Cp, BIC for each "best" model.
+## Let's take a look at these values.
+#
+## Plots of Cp and Adj-R2 as functions of parameters
+#
+#par(mar=c(4,4,1,1))
+#par(mfrow=c(1,2))
+#
+#plot(2:8, rs$cp, xlab="No of parameters", ylab="Cp Statistic")
+#abline(0,1)
+#
+#plot(2:8, rs$adjr2, xlab="No of parameters", ylab="Adj R2")
+
+```
+
+```{r}
 anova(mult.fit1,mult.fit2)
 ```
 
